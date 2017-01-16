@@ -52,7 +52,6 @@ class Engine {
         self.nextPiece = generateRandomPiece()
         
         self.board.clear()
-        placeCurrentPieceAboveBoard()
         
         let date = Date(timeIntervalSinceNow: self.interval)
         let timer = Timer(fire: date, interval: self.interval, repeats: yes) {
@@ -83,11 +82,21 @@ class Engine {
     
     func timerTick() {
         fallByOneBlock()
-        self.callback?(.move)
+        if isFalling {
+            self.callback?(.fall(by: 1))
+        }
+        else {
+            self.currentPiece = self.nextPiece
+            self.nextPiece = self.generateRandomPiece()
+            placeCurrentPieceAboveBoard()
+            self.callback?(.newPiece)
+        }
     }
     
     var currentPiece: Piece
     var nextPiece: Piece
+    
+    var isFalling: Bool = no
     
     typealias Coordinate = (x: Int, y: Int)
     var fallingAnchor: Coordinate = (0,0)
@@ -111,12 +120,21 @@ class Engine {
         
         self.fallingAnchor = anchor
         coords = coords.map { (x: $0.x + anchor.x, y: $0.y + anchor.y) }
+        self.isFalling = yes
         updateFallingBlocks(coordinates: coords)
     }
     
     func fallByOneBlock() {
-        let coords = self.fallingCoordinates.map { (x: $0.x, y: $0.y - 1) }
-        updateFallingBlocks(coordinates: coords)
+        if isTouchedDown {
+            self.isFalling = no
+            makeFalledBlockPermanent()
+            self.fallingAnchor = (0,0)
+            self.fallingCoordinates = []
+        }
+        else {
+            let coords = self.fallingCoordinates.map { (x: $0.x, y: $0.y - 1) }
+            updateFallingBlocks(coordinates: coords)
+        }
     }
     
     func updateFallingBlocks(coordinates: [Coordinate]) {
@@ -127,6 +145,26 @@ class Engine {
         let kind = self.currentPiece.kind
         for coord in self.fallingCoordinates {
             self.board.setBlockAt(x: coord.x, y: coord.y, block: .falling(kind: kind))
+        }
+    }
+    
+    var isTouchedDown: Bool {
+        for coord in self.fallingCoordinates {
+            if (coord.y == 0) {
+                return yes
+            }
+            let blockBelow = self.board.blockAt(x: coord.x, y: coord.y - 1)
+            if case .filled = blockBelow {
+                return yes
+            }
+        }
+        return no
+    }
+    
+    func makeFalledBlockPermanent() {
+        let kind = self.currentPiece.kind
+        for coord in self.fallingCoordinates {
+            self.board.setBlockAt(x: coord.x, y: coord.y, block: .filled(kind: kind))
         }
     }
     
@@ -149,13 +187,15 @@ class Engine {
         return self.board.blockAt(x: x, y: y)
     }
     
-    enum Step {
-        case new
-        case move
-        case rotate
-        case clear(lines: Range<Int>)
+    enum Event {
+        typealias Degrees = Int
+        case newPiece
+        case fall(by: Int)
+        case userMove(offset: Int)
+        case userRotate(by: Degrees)
+        case clearedLines(range: Range<Int>)
     }
-    typealias Callback = (Step) -> Void
+    typealias Callback = (Event) -> Void
     var callback: Callback?
     
     var score: Int = 0
