@@ -62,7 +62,7 @@ class Engine {
         self.timer = timer
         RunLoop.main.add(timer, forMode: .commonModes)
         
-        self.callback?(.newPiece)
+        self.callback?(.startGame)
         resume()
     }
     
@@ -91,7 +91,7 @@ class Engine {
             return
         }
         if isFalling {
-            self.callback?(.fall(by: 1))
+            self.callback?(.fall)
         }
         else {
             self.currentPiece = self.nextPiece
@@ -210,7 +210,7 @@ class Engine {
         let coords = self.fallingCoordinates.map { (x: $0.x - 1, y: $0.y) }
         updateFallingBlocks(coordinates: coords)
         
-        self.callback?(.userMove(offset: -1))
+        self.callback?(.moveLeft)
     }
     
     var canMoveLeft: Bool {
@@ -234,7 +234,7 @@ class Engine {
         let coords = self.fallingCoordinates.map { (x: $0.x + 1, y: $0.y) }
         updateFallingBlocks(coordinates: coords)
         
-        self.callback?(.userMove(offset: +1))
+        self.callback?(.moveRight)
     }
     
     var canMoveRight: Bool {
@@ -250,6 +250,15 @@ class Engine {
         return yes
     }
     
+    func drop() {
+        var distance = 0
+        while self.isFalling {
+            fallByOneBlock()
+            distance += 1
+        }
+        self.callback?(.drop(by: distance))
+    }
+    
     
     var board: Board
     func blockAt(x: Int, y: Int) -> Board.Block {
@@ -258,11 +267,13 @@ class Engine {
     
     enum Event {
         typealias Degrees = Int
+        case startGame
         case newPiece
-        case fall(by: Int)
-        case userMove(offset: Int)
-        case userRotate(by: Degrees)
-        case clearedLines(range: Range<Int>)
+        case fall
+        case drop(by: Int)
+        case moveLeft
+        case moveRight
+        case cleared(range: Range<Int>)
         case gameOver
     }
     typealias Callback = (Event) -> Void
