@@ -45,7 +45,7 @@ class Engine {
     var state: State
     
     var timer: Timer?
-    var interval: TimeInterval = 1
+    var interval: TimeInterval = 0.125
     
     func start() {
         self.currentPiece = generateRandomPiece()
@@ -81,7 +81,13 @@ class Engine {
     }
     
     func timerTick() {
+        if self.state != .running {
+            return
+        }
         fallByOneBlock()
+        if self.state == .stopped {
+            return
+        }
         if isFalling {
             self.callback?(.fall(by: 1))
         }
@@ -166,6 +172,19 @@ class Engine {
         for coord in self.fallingCoordinates {
             self.board.setBlockAt(x: coord.x, y: coord.y, block: .filled(kind: kind))
         }
+        checkForGameOver()
+    }
+    
+    func checkForGameOver() {
+        for y in self.height..<self.board.height {
+            for x in 0..<self.width {
+                let block = self.board.blockAt(x: x, y: y)
+                if case .filled = block {
+                    stop()
+                    self.callback?(.gameOver)
+                }
+            }
+        }
     }
     
     func rotateCoordinate(_ coord: Coordinate, around: Coordinate, to orientation: Piece.Orientation) -> Coordinate {
@@ -194,6 +213,7 @@ class Engine {
         case userMove(offset: Int)
         case userRotate(by: Degrees)
         case clearedLines(range: Range<Int>)
+        case gameOver
     }
     typealias Callback = (Event) -> Void
     var callback: Callback?
