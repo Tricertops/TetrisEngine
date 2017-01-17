@@ -45,7 +45,8 @@ class Engine {
     var state: State
     
     var timer: Timer?
-    var interval: TimeInterval = 0.125
+    //TODO: Higher score -> shorter intervals.
+    var interval: TimeInterval = 1
     
     func start() {
         self.currentPiece = generateRandomPiece()
@@ -61,6 +62,7 @@ class Engine {
         self.timer = timer
         RunLoop.main.add(timer, forMode: .commonModes)
         
+        self.callback?(.newPiece)
         resume()
     }
     
@@ -198,6 +200,54 @@ class Engine {
     
     func generateRandomPiece() -> Piece {
         return Piece(kind: Piece.Kind.random(), orientation: Piece.Orientation.random())
+    }
+    
+    func moveLeft() {
+        if !self.canMoveLeft {
+            return
+        }
+        
+        let coords = self.fallingCoordinates.map { (x: $0.x - 1, y: $0.y) }
+        updateFallingBlocks(coordinates: coords)
+        
+        self.callback?(.userMove(offset: -1))
+    }
+    
+    var canMoveLeft: Bool {
+        for coord in self.fallingCoordinates {
+            if coord.x == 0 {
+                return no
+            }
+            let leftBlock = self.board.blockAt(x: coord.x - 1, y: coord.y)
+            if case .filled = leftBlock {
+                return no
+            }
+        }
+        return yes
+    }
+    
+    func moveRight() {
+        if !self.canMoveRight {
+            return
+        }
+        
+        let coords = self.fallingCoordinates.map { (x: $0.x + 1, y: $0.y) }
+        updateFallingBlocks(coordinates: coords)
+        
+        self.callback?(.userMove(offset: +1))
+    }
+    
+    var canMoveRight: Bool {
+        for coord in self.fallingCoordinates {
+            if coord.x + 1 == self.width {
+                return no
+            }
+            let rightBlock = self.board.blockAt(x: coord.x + 1, y: coord.y)
+            if case .filled = rightBlock {
+                return no
+            }
+        }
+        return yes
     }
     
     
