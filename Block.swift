@@ -76,7 +76,7 @@ struct Block {
     
     func canBePlaced(in board: Board, using: (Position) -> Position = {$0}) -> Bool {
         for position in absolutePositions {
-            if board.cell(at: using(position)).isNotFree {
+            if board.cell(at: using(position)).isFree.not {
                 return no
             }
         }

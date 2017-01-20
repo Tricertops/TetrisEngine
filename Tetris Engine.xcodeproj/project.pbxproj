@@ -7,13 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5B5628921E2D513200BF7F1F /* TetrisEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B5628911E2D513200BF7F1F /* TetrisEngine.swift */; };
+		5B98C6521E3294440023CA43 /* Block.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B98C64E1E3294440023CA43 /* Block.swift */; };
+		5B98C6531E3294440023CA43 /* Board.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B98C64F1E3294440023CA43 /* Board.swift */; };
+		5B98C6541E3294440023CA43 /* Boolean.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B98C6501E3294440023CA43 /* Boolean.swift */; };
+		5B98C6551E3294440023CA43 /* Engine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B98C6511E3294440023CA43 /* Engine.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		5B5628821E2D480B00BF7F1F /* Tetris.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Tetris.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		5B5628911E2D513200BF7F1F /* TetrisEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TetrisEngine.swift; sourceTree = "<group>"; };
 		5B5628931E2D513B00BF7F1F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5B98C64E1E3294440023CA43 /* Block.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Block.swift; sourceTree = "<group>"; };
+		5B98C64F1E3294440023CA43 /* Board.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Board.swift; sourceTree = "<group>"; };
+		5B98C6501E3294440023CA43 /* Boolean.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Boolean.swift; sourceTree = "<group>"; };
+		5B98C6511E3294440023CA43 /* Engine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Engine.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,7 +37,7 @@
 			isa = PBXGroup;
 			children = (
 				5B5628931E2D513B00BF7F1F /* Info.plist */,
-				5B5628911E2D513200BF7F1F /* TetrisEngine.swift */,
+				5B98C64D1E32942F0023CA43 /* Sources */,
 				5B5628831E2D480B00BF7F1F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -42,6 +48,17 @@
 				5B5628821E2D480B00BF7F1F /* Tetris.framework */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		5B98C64D1E32942F0023CA43 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				5B98C6511E3294440023CA43 /* Engine.swift */,
+				5B98C64F1E3294440023CA43 /* Board.swift */,
+				5B98C64E1E3294440023CA43 /* Block.swift */,
+				5B98C6501E3294440023CA43 /* Boolean.swift */,
+			);
+			name = Sources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -124,7 +141,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5B5628921E2D513200BF7F1F /* TetrisEngine.swift in Sources */,
+				5B98C6531E3294440023CA43 /* Board.swift in Sources */,
+				5B98C6551E3294440023CA43 /* Engine.swift in Sources */,
+				5B98C6541E3294440023CA43 /* Boolean.swift in Sources */,
+				5B98C6521E3294440023CA43 /* Block.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,6 +251,7 @@
 		5B56288B1E2D480B00BF7F1F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = TAQH2MQM62;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -242,12 +263,15 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Tricertops.Tetris-Engine";
 				PRODUCT_NAME = Tetris;
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
 		5B56288C1E2D480B00BF7F1F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = TAQH2MQM62;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -259,6 +283,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Tricertops.Tetris-Engine";
 				PRODUCT_NAME = Tetris;
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

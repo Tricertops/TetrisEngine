@@ -8,3 +8,11 @@
 
 let yes = true
 let no = false
+
+extension Bool {
+    
+    var not: Bool {
+        return !self
+    }
+    
+}

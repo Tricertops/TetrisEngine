@@ -41,6 +41,9 @@ class Board {
         clear()
     }
     
+    func index(for position: Position) -> Int {
+        return position.y * width + position.x
+    }
     
     func cell(at: Position) -> Cell {
         guard at.x >= 0 else { return .outer }
@@ -48,8 +51,7 @@ class Board {
         guard at.x < width  else { return .outer }
         guard at.y < height else { return .outer }
         
-        let index = at.y * width + at.x
-        return cells[index]
+        return cells[index(for: at)]
     }
     
     func set(cell: Cell, at: Position) {
@@ -59,8 +61,7 @@ class Board {
         guard at.x < width  else { return }
         guard at.y < height else { return }
         
-        let index = at.y * width + at.x
-        cells[index] = cell
+        cells[index(for: at)] = cell
     }
     
     func clear() {
@@ -70,7 +71,7 @@ class Board {
     func isObstacle(above: Int) -> Bool {
         for y in above..<height {
             for x in 0..<width {
-                if cell(at: Position(x: x, y: y)).isNotFree {
+                if cell(at: Position(x: x, y: y)).isFree.not {
                     return yes
                 }
             }
@@ -88,6 +89,35 @@ class Board {
             }
         }
         Swift.print(lines.joined(separator: "\n"))
+    }
+    
+    func findCompletedLines() -> IndexSet {
+        var lines = IndexSet()
+        for y in 0..<height {
+            if isCompleted(line: y) {
+                lines.insert(y)
+            }
+        }
+        return lines
+    }
+    
+    func isCompleted(line: Int) -> Bool {
+        for x in 0..<width {
+            if cell(at: Position(x: x, y: line)).isCompleted.not {
+                return no
+            }
+        }
+        return yes
+    }
+    
+    func remove(lines: IndexSet) {
+        for y in lines.reversed() {
+            for x in (0..<width).reversed() {
+                let position = Position(x: x, y: y)
+                cells.remove(at: index(for: position))
+                cells.append(.empty)
+            }
+        }
     }
     
 }
@@ -115,8 +145,11 @@ enum Cell {
         }
     }
     
-    var isNotFree: Bool {
-        return !isFree
+    var isCompleted: Bool {
+        switch self {
+        case .obstacle: return yes
+        default: return no
+        }
     }
     
     var visualDescription: String {

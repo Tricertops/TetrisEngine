@@ -23,12 +23,12 @@ class Engine {
         self.width = width
         self.height = height
         
-        self.board = Board(width: width, height: height + 5)
+        board = Board(width: width, height: height + 5)
         
-        self.currentBlock = Block(shape: .T)
-        self.nextBlock = Block(shape: .T)
+        currentBlock = Block(shape: .T)
+        nextBlock = Block(shape: .T)
         
-        self.state = .initialized
+        state = .initialized
     }
     
     
@@ -41,57 +41,82 @@ class Engine {
     var state: State
     
     var timer: Timer?
-    //TODO: Higher score -> shorter intervals.
-    var interval: TimeInterval = 1
+    var interval: TimeInterval {
+        let initial = 1.0
+        let step = 0.02
+        return max(initial - Double(score) * step, step)
+    }
     
-    func start() {
-        self.board.clear()
+    var score: Int = 0 {
+        didSet {
+            runTimer()
+        }
+    }
+    
+    func runTimer() {
+        stopTimer()
         
-        let date = Date(timeIntervalSinceNow: self.interval)
-        let timer = Timer(fire: date, interval: self.interval, repeats: yes) {
+        let date = Date(timeIntervalSinceNow: interval)
+        timer = Timer(fire: date, interval: interval, repeats: yes) {
             [unowned self] _ in
             self.timerTick()
         }
-        self.timer = timer
-        RunLoop.main.add(timer, forMode: .commonModes)
         
-        self.callback?(.startGame)
+        RunLoop.main.add(timer!, forMode: .commonModes)
+    }
+    
+    func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    func start() {
+        score = 0
+        board.clear()
         
         currentBlock = Block.random().placed(above: height, in: board)
         nextBlock = Block.random()
-        self.callback?(.newPiece)
         
-        resume()
+        callback?(.startGame)
+        callback?(.newPiece)
+        
+        runTimer()
+        state = .running
     }
     
     func pause() {
-        self.timer?.fireDate = Date.distantFuture
-        self.state = .paused
+        stopTimer()
+        state = .paused
     }
     
     func resume() {
-        self.timer?.fireDate = Date(timeIntervalSinceNow: self.interval)
-        self.state = .running
+        runTimer()
+        state = .running
     }
     
     func stop() {
-        self.timer?.invalidate()
-        self.timer = nil
-        self.state = .stopped
+        stopTimer()
+        state = .stopped
     }
     
     func timerTick() {
-        if self.state != .running {
+        if state != .running {
             return
         }
         if currentBlock.canFall(in: board) {
             currentBlock.fall()
-            self.callback?(.fall)
+            callback?(.fall)
         }
         else if case .falling = currentBlock.cell {
             currentBlock.makeObstacle()
             
-            //TODO: Detect completed lines
+            let completed = board.findCompletedLines()
+            if completed.count > 0 {
+                board.remove(lines: completed)
+                score += completed.count
+                callback?(.completed(lines: completed))
+            }
+            
             if board.isObstacle(above: height) {
                 callback?(.gameOver)
                 stop()
@@ -100,7 +125,7 @@ class Engine {
         else {
             currentBlock = nextBlock.placed(above: height, in: board)
             nextBlock = Block.random()
-            self.callback?(.newPiece)
+            callback?(.newPiece)
         }
     }
     
@@ -167,13 +192,11 @@ class Engine {
         case moveLeft
         case moveRight
         case rotate(by: Degrees)
-        case cleared(range: Range<Int>)
+        case completed(lines: IndexSet)
         case gameOver
     }
     typealias Callback = (Event) -> Void
     var callback: Callback?
-    
-    var score: Int = 0
     
 }
 
