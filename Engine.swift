@@ -144,12 +144,11 @@ class Engine {
             currentBlock.fall()
             distance += 1
         }
-        self.callback?(.drop(by: distance))
+        callback?(.drop(by: distance))
     }
     
     func rotate() {
-        if currentBlock.canRotate(in: board) {
-            currentBlock.rotate()
+        if currentBlock.rotate(in: board) {
             callback?(.rotate(by: 90))
         }
     }

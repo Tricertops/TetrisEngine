@@ -74,7 +74,7 @@ struct Block {
         return canBePlaced(in: board) { $0.below }
     }
     
-    func canBePlaced(in board: Board, using: (Position) -> Position) -> Bool {
+    func canBePlaced(in board: Board, using: (Position) -> Position = {$0}) -> Bool {
         for position in absolutePositions {
             if board.cell(at: using(position)).isNotFree {
                 return no
@@ -118,17 +118,45 @@ struct Block {
         anchor = anchor.right
     }
     
-    func canRotate(in board: Board) -> Bool {
+    mutating func rotate(in board: Board) -> Bool {
+        var rotated = self
+        rotated.orientation = orientation.clockwise
+        let indices = Block.matrixIndices(shape: rotated.shape, orientation: rotated.orientation)
+        rotated.relativePositions = indices.map(Position.init(matrixIndex:))
+        
+        let canBeRotated = rotated.attemptToFit(in: board)
+        if canBeRotated {
+            self = rotated
+        }
+        return canBeRotated
+    }
+    
+    mutating func attemptToFit(in board: Board) -> Bool {
+        if canBePlaced(in: board) {
+            return yes
+        }
+        if canMoveLeft(in: board) {
+            moveLeft()
+            return yes
+        }
+        else if canMoveRight(in: board) {
+            moveRight()
+            return yes
+        }
+        if shape != .I {
+            return no
+        }
+        // “I” shape is so long it makes sens to move by 2 cells.
+        if orientation == .east || orientation == .west {
+            moveLeft()
+            if canMoveLeft(in: board) {
+                moveLeft()
+                return yes
+            }
+        }
         return no
     }
     
-    mutating func rotate() {
-        //TODO: Calculate rotated coords
-        //TODO: Check if they collide left and right
-        //TODO: If both, cannot rotate
-        //TODO: If one collides, move by one
-        //TODO:
-    }
 }
 
 
@@ -224,7 +252,7 @@ extension Block {
         case .Z:
             switch orientation {
             case .north, .south: return [21,(11),12,02]
-            case .west, .east:   return [12,(11),10,00]
+            case .west, .east:   return [12,(11),01,00]
             }
         case .L:
             switch orientation {
@@ -245,7 +273,7 @@ extension Block {
             case .north: return [01,(11),21,10]
             case .west:  return [10,(11),12,21]
             case .south: return [01,(11),21,12]
-            case .east:  return [10,(11),12,21]
+            case .east:  return [10,(11),12,01]
             }
         }
     }
