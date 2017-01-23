@@ -73,9 +73,9 @@ class Engine {
     func start() {
         score = 0
         board.clear()
-        
-        currentBlock = Block.random().placed(above: height, in: board)
-        nextBlock = Block.random()
+        recentShapes = []
+        currentBlock = generateNextBlock().placed(above: height, in: board)
+        nextBlock = generateNextBlock()
         
         callback?(.startGame)
         callback?(.newPiece)
@@ -124,7 +124,7 @@ class Engine {
         }
         else {
             currentBlock = nextBlock.placed(above: height, in: board)
-            nextBlock = Block.random()
+            nextBlock = generateNextBlock()
             callback?(.newPiece)
         }
     }
@@ -148,6 +148,25 @@ class Engine {
         }
     }
     var nextBlock: Block
+    
+    var recentShapes: [Block.Shape] = []
+    
+    func generateNextBlock() -> Block {
+        var shapes = Block.Shape.all
+        for recent in recentShapes {
+            let index = shapes.index(of: recent)!
+            shapes.remove(at: index)
+        }
+        let shape = shapes.random()
+        recentShapes.append(shape)
+        let memory = 3
+        let excess = recentShapes.count - memory
+        if excess > 0 {
+            recentShapes.removeFirst(excess)
+        }
+        dump(recentShapes)
+        return Block(shape: shape, orientation: Block.Orientation.all.random())
+    }
     
     func moveLeft() {
         if currentBlock.canMoveLeft(in: board) {

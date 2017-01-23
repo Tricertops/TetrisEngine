@@ -32,10 +32,6 @@ struct Block {
         relativePositions = indices.map(Position.init(matrixIndex:))
     }
     
-    static func random() -> Block {
-        return Block(shape: Shape.random(), orientation: Orientation.random())
-    }
-    
     mutating func rotate(clockwise: Bool) {
         let newOrientation = (clockwise ? orientation.clockwise : orientation.counterClockwise)
         let indices = Block.matrixIndices(shape: shape, orientation: newOrientation)
@@ -171,11 +167,6 @@ extension Block {
         case T
         
         static let all: [Shape] = [.O, .I, .S, .Z, .L, .J, .T]
-        
-        static func random() -> Shape {
-            let index = Int(arc4random_uniform(UInt32(all.count)))
-            return all[index]
-        }
     }
 }
 
@@ -188,11 +179,6 @@ extension Block {
         case south
         
         static let all: [Orientation] = [.north, .east, .west, .south]
-        
-        static func random() -> Orientation {
-            let index = Int(arc4random_uniform(UInt32(all.count)))
-            return all[index]
-        }
         
         var clockwise: Orientation {
             switch self {
