@@ -21,6 +21,22 @@ struct Block {
                             y: $0.y + anchor.y)
         }
     }
+    var rectangle: (x: Int, y: Int, width: Int, height: Int) {
+        var top = 0
+        var left = 0
+        var right = 0
+        var bottom = 0
+        for position in relativePositions {
+            if top < position.y { top = position.y }
+            if left > position.x { left = position.x }
+            if right < position.x { right = position.x }
+            if bottom > position.y { bottom = position.y }
+        }
+        return (x: left,
+                y: bottom,
+                width: right - left + 1,
+                height: top - bottom + 1)
+    }
     
     var cell: Cell = .empty
     
