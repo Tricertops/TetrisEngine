@@ -50,25 +50,21 @@ class Engine {
         return max(initialInterval - Double(score) * step, step)
     }
     
-    var score: Int = 0 {
-        didSet {
-            runTimer()
-        }
-    }
+    var score: Int = 0
     
-    func runTimer() {
-        stopTimer()
+    func scheduleTick() {
+        cancelTick()
         
         let date = Date(timeIntervalSinceNow: interval)
-        timer = Timer(fire: date, interval: interval, repeats: yes) {
+        timer = Timer(fire: date, interval: interval, repeats: no) {
             [unowned self] _ in
-            self.timerTick()
+            self.tick()
         }
         
         RunLoop.main.add(timer!, forMode: .commonModes)
     }
     
-    func stopTimer() {
+    func cancelTick() {
         timer?.invalidate()
         timer = nil
     }
@@ -83,32 +79,33 @@ class Engine {
         callback?(.startGame)
         callback?(.newPiece)
         
-        runTimer()
+        scheduleTick()
         state = .running
     }
     
     func pause() {
-        stopTimer()
+        cancelTick()
         state = .paused
     }
     
     func resume() {
-        runTimer()
+        scheduleTick()
         state = .running
     }
     
     func stop() {
-        stopTimer()
+        cancelTick()
         state = .stopped
     }
     
-    func timerTick() {
-        if state != .running {
-            return
-        }
+    func tick() {
+        assert(state == .running)
+        cancelTick()
+        
         if currentBlock.canFall(in: board) {
             currentBlock.fall()
             callback?(.fall)
+            scheduleTick()
         }
         else if case .falling = currentBlock.cell {
             currentBlock.makeObstacle()
@@ -124,11 +121,15 @@ class Engine {
                 callback?(.gameOver)
                 stop()
             }
+            else {
+                scheduleTick()
+            }
         }
         else {
             currentBlock = nextBlock.placed(above: height, in: board)
             nextBlock = generateNextBlock()
             callback?(.newPiece)
+            tick()
         }
     }
     
@@ -191,6 +192,7 @@ class Engine {
             distance += 1
         }
         callback?(.drop(by: distance))
+        tick()
     }
     
     func rotate() {
