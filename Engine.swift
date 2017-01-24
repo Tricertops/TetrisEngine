@@ -167,7 +167,6 @@ class Engine {
         if excess > 0 {
             recentShapes.removeFirst(excess)
         }
-        dump(recentShapes)
         return Block(shape: shape, orientation: Block.Orientation.all.random())
     }
     
