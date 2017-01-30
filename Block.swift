@@ -266,9 +266,9 @@ extension Block {
         case .J:
             switch orientation {
             case .north: return [12,(11),10,00]
-            case .west:  return [21,(11),01,02]
+            case .west:  return [01,(11),21,20]
             case .south: return [10,(11),12,22]
-            case .east:  return [01,(11),21,20]
+            case .east:  return [21,(11),01,02]
             }
         case .T:
             switch orientation {

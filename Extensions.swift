@@ -5,10 +5,15 @@
 //  Created by Martin Kiss on 17 Jan 2017.
 //  Copyright © 2017 Tricertops. All rights reserved.
 //
+
 import Foundation
+import CoreGraphics
 
 let yes = true
 let no = false
+
+typealias Degrees = CGFloat
+typealias Radians = CGFloat
 
 extension Bool {
     
