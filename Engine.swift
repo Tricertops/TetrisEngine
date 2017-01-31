@@ -77,7 +77,7 @@ class Engine {
         nextBlock = generateNextBlock()
         
         callback?(.startGame)
-        callback?(.newPiece)
+        callback?(.newBlock)
         
         scheduleTick()
         state = .running
@@ -128,7 +128,7 @@ class Engine {
         else {
             currentBlock = nextBlock.placed(above: height, in: board)
             nextBlock = generateNextBlock()
-            callback?(.newPiece)
+            callback?(.newBlock)
             tick()
         }
     }
@@ -209,7 +209,7 @@ class Engine {
     enum Event {
         typealias Degrees = Int
         case startGame
-        case newPiece
+        case newBlock
         case fall
         case drop(by: Int)
         case moveLeft
