@@ -108,7 +108,8 @@ class Engine {
             scheduleTick()
         }
         else if case .falling = currentBlock.cell {
-            currentBlock.makeObstacle()
+            currentBlock.makeFrozen()
+            callback?(.freeze)
             
             let completed = board.findCompletedLines()
             if completed.count > 0 {
@@ -117,7 +118,7 @@ class Engine {
                 callback?(.completed(lines: completed))
             }
             
-            if board.isObstacle(above: height) {
+            if board.isFrozen(above: height) {
                 callback?(.gameOver)
                 stop()
             }
@@ -215,6 +216,7 @@ class Engine {
         case moveLeft
         case moveRight
         case rotate(by: Degrees)
+        case freeze
         case completed(lines: IndexSet)
         case gameOver
     }

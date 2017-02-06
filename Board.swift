@@ -68,7 +68,7 @@ class Board {
         cells = Array(repeating: .empty, count: width * height)
     }
     
-    func isObstacle(above: Int) -> Bool {
+    func isFrozen(above: Int) -> Bool {
         for y in above..<height {
             for x in 0..<width {
                 if cell(at: Position(x: x, y: y)).isFree.not {
@@ -125,7 +125,7 @@ class Board {
 
 enum Cell {
     case empty
-    case obstacle(shape: Block.Shape)
+    case frozen(shape: Block.Shape)
     case falling(shape: Block.Shape)
     case outer
     
@@ -147,7 +147,7 @@ enum Cell {
     
     var isCompleted: Bool {
         switch self {
-        case .obstacle: return yes
+        case .frozen: return yes
         default: return no
         }
     }
@@ -155,7 +155,7 @@ enum Cell {
     var visualDescription: String {
         switch self {
         case .empty: return "∙"
-        case .obstacle: return "█"
+        case .frozen: return "█"
         case .falling: return "▓"
         case .outer: return "╳"
         }

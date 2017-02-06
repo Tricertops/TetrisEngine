@@ -103,8 +103,8 @@ struct Block {
         cell = .falling(shape: shape)
     }
     
-    mutating func makeObstacle() {
-        cell = .obstacle(shape: shape)
+    mutating func makeFrozen() {
+        cell = .frozen(shape: shape)
     }
     
     var isFalling: Bool {
