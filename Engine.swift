@@ -52,9 +52,10 @@ class Engine {
     
     var score: Int = 0
     
-    func scheduleTick() {
+    func scheduleTick(in time: TimeInterval? = nil) {
         cancelTick()
         
+        let interval = time ?? self.interval
         let date = Date(timeIntervalSinceNow: interval)
         timer = Timer(fire: date, interval: interval, repeats: no) {
             [unowned self] _ in
@@ -186,14 +187,16 @@ class Engine {
         }
     }
     
-    func drop() {
+    func drop(in time: TimeInterval = 0) {
+        cancelTick()
+        
         var distance = 0
         while currentBlock.isFalling && currentBlock.canFall(in: board) {
             currentBlock.fall()
             distance += 1
         }
         callback?(.drop(by: distance))
-        tick()
+        scheduleTick(in: time)
     }
     
     func rotate() {
