@@ -29,7 +29,7 @@ extension Bool {
 extension Int {
     
     static func random(of: Int = .max) -> Int {
-        let count = Swift.min(of, Int(UInt32.max))
+        let count = Swift.min(Swift.max(0, of), Int(Int32.max))
         return Int(arc4random_uniform(UInt32(count)))
     }
     
