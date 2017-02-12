@@ -248,12 +248,12 @@ extension Block {
             }
         case .S:
             switch orientation {
-            case .north, .south: return [01,(11),12,22]
+            case .north, .south: return [21,(11),10,00]
             case .west, .east:   return [10,(11),01,02]
             }
         case .Z:
             switch orientation {
-            case .north, .south: return [21,(11),12,02]
+            case .north, .south: return [01,(11),10,20]
             case .west, .east:   return [12,(11),01,00]
             }
         case .L:
