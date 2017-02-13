@@ -17,13 +17,12 @@ class Engine {
     let width: Int
     let height: Int
     
-    init(width: Int, height: Int, interval: TimeInterval, limit: Int) {
+    init(width: Int, height: Int, interval: TimeInterval) {
         assert(width >= 4)
         assert(height >= 10)
         self.width = width
         self.height = height
         initialInterval = interval
-        scoreLimit = limit
         
         board = Board(width: width, height: height + 5)
         
@@ -43,11 +42,14 @@ class Engine {
     var state: State
     
     var timer: Timer?
+    
     let initialInterval: TimeInterval
-    let scoreLimit: Int
+    
     var interval: TimeInterval {
-        let step = initialInterval / TimeInterval(scoreLimit)
-        return max(initialInterval - Double(score) * step, step)
+        // Decrease asymptotically to zero.
+        // Half of the initial time is around score 70, quarter around 210.
+        let exponent = 1 / (Double(score) / 100 + 1)
+        return initialInterval * pow(2, exponent) - 1
     }
     
     var score: Int = 0
