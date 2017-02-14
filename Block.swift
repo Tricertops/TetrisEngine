@@ -83,7 +83,7 @@ struct Block {
     }
     
     func canFall(in board: Board) -> Bool {
-        return canBePlaced(in: board) { $0.below }
+        return isFalling && canBePlaced(in: board) { $0.below }
     }
     
     func canBePlaced(in board: Board, using: (Position) -> Position = {$0}) -> Bool {
@@ -115,7 +115,7 @@ struct Block {
     }
     
     func canMoveLeft(in board: Board) -> Bool {
-        return canBePlaced(in: board) { $0.left }
+        return isFalling && canBePlaced(in: board) { $0.left }
     }
     
     mutating func moveLeft() {
@@ -123,7 +123,7 @@ struct Block {
     }
     
     func canMoveRight(in board: Board) -> Bool {
-        return canBePlaced(in: board) { $0.right }
+        return isFalling && canBePlaced(in: board) { $0.right }
     }
     
     mutating func moveRight() {
