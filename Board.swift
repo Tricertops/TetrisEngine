@@ -9,7 +9,7 @@
 import Foundation
 
 
-struct Position {
+struct Position: Serializable {
     var x: Int
     var y: Int
     
@@ -25,10 +25,20 @@ struct Position {
     var right: Position {
         return Position(x: x + 1, y: y)
     }
+    
+    typealias Representation = [Int]
+    func serialize() -> Representation {
+        return [x, y]
+    }
+    static func deserialize(_ array: Representation) -> Position? {
+        guard array.count == 2 else { return nil }
+        
+        return Position(x: array[0], y: array[1])
+    }
 }
 
 
-class Board {
+final class Board: Serializable {
     let width: Int
     let height: Int
     var cells: [Cell] = []
@@ -120,10 +130,40 @@ class Board {
         }
     }
     
+    
+    typealias Representation = [String: Any]
+    
+    func serialize() -> Representation {
+        var dict: Representation = [:]
+        
+        dict["width"] = width
+        dict["height"] = height
+        dict["cells"] = cells.map { $0.serialize() }
+        
+        return dict
+    }
+    static func deserialize(_ dict: Representation) -> Board? {
+        guard let width = dict["width"] as? Int else { return nil }
+        guard let height = dict["height"] as? Int else { return nil }
+        
+        let board = Board(width: width, height: height)
+        
+        guard let cellsStrings = dict["cells"] as? [String] else { return nil }
+        guard cellsStrings.count == width * height else { return nil }
+        var cells: [Cell] = []
+        for s in cellsStrings {
+            guard let cell = Cell.deserialize(s) else { return nil }
+            cells.append(cell)
+        }
+        board.cells = cells
+        
+        return board
+    }
+    
 }
 
 
-enum Cell {
+enum Cell: Serializable {
     case empty
     case frozen(shape: Block.Shape)
     case falling(shape: Block.Shape)
@@ -159,6 +199,35 @@ enum Cell {
         case .falling: return "▓"
         case .outer: return "╳"
         }
+    }
+    
+    
+    typealias Representation = String
+    
+    func serialize() -> Representation {
+        switch self {
+        case .empty: return " "
+        case .frozen(let shape): return shape.serialize().uppercased()
+        case .falling(let shape): return shape.serialize().lowercased()
+        case .outer: return "X"
+        }
+    }
+    static func deserialize(_ string: Representation) -> Cell? {
+        if string == " " {
+            return .empty
+        }
+        if string == "X" {
+            return .outer
+        }
+        if string == string.uppercased() {
+            guard let shape = Block.Shape.deserialize(string) else { return nil }
+            return .frozen(shape: shape)
+        }
+        if string == string.lowercased() {
+            guard let shape = Block.Shape.deserialize(string) else { return nil }
+            return .falling(shape: shape)
+        }
+        return nil
     }
 }
 

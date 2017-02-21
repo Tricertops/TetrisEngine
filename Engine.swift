@@ -12,7 +12,7 @@
 import Foundation
 
 
-class Engine {
+final class Engine: Serializable {
     
     let width: Int
     let height: Int
@@ -228,9 +228,55 @@ class Engine {
     typealias Callback = (Event) -> Void
     var callback: Callback?
     
+    
+    typealias Representation = [String: Any]
+    
+    func serialize() -> Representation {
+        var dict: Representation = [:]
+        
+        dict["width"] = width
+        dict["height"] = height
+        dict["initialInterval"] = initialInterval
+        dict["score"] = score
+        
+        dict["currentBlock"] = currentBlock.serialize()
+        dict["nextBlock"] = nextBlock.serialize()
+        dict["recentShapes"] = recentShapes.map { $0.serialize() }
+        dict["board"] = board.serialize()
+        
+        return dict
+    }
+    
+    static func deserialize(_ dict: Representation) -> Engine? {
+        guard let width = dict["width"] as? Int else { return nil }
+        guard let height = dict["height"] as? Int else { return nil }
+        guard let interval = dict["initialInterval"] as? TimeInterval else { return nil }
+        
+        let engine = Engine(width: width, height: height, interval: interval)
+        
+        guard let score = dict["score"] as? Int else { return nil }
+        engine.score = score
+        
+        guard let currentBlock = Block.deserialize(dict["currentBlock"]) else { return nil }
+        engine.currentBlock = currentBlock
+        
+        guard let nextBlock = Block.deserialize(dict["nextBlock"]) else { return nil }
+        engine.nextBlock = nextBlock
+        
+        guard let recentShapesStrings = dict["recentShapes"] as? [String] else { return nil }
+        var recentShapes: [Block.Shape] = []
+        for s in recentShapesStrings {
+            guard let shape = Block.Shape.deserialize(s) else { return nil }
+            recentShapes.append(shape)
+        }
+        engine.recentShapes = recentShapes
+        
+        guard let board = Board.deserialize(dict["board"]) else { return nil }
+        engine.board = board
+        
+        return engine
+    }
+    
 }
-
-
-
 
 

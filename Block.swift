@@ -9,7 +9,7 @@
 import Foundation
 
 
-struct Block {
+struct Block: Serializable {
     let shape: Shape
     var orientation: Orientation = .north
     
@@ -169,11 +169,46 @@ struct Block {
         return no
     }
     
+    
+    typealias Representation = [String: Any]
+    
+    func serialize() -> Representation {
+        var dict: [String: Any] = [:]
+        
+        dict["shape"] = shape.serialize()
+        dict["orientation"] = orientation.serialize()
+        dict["anchor"] = anchor.serialize()
+        dict["relativePositions"] = relativePositions.map { $0.serialize() }
+        dict["cell"] = cell.serialize()
+        
+        return dict
+    }
+    static func deserialize(_ dict: Representation) -> Block? {
+        guard let shape = Shape.deserialize(dict["shape"]) else { return nil }
+        guard let orientation = Orientation.deserialize(dict["orientation"]) else { return nil }
+        guard let anchor = Position.deserialize(dict["anchor"]) else { return nil }
+        guard let cell = Cell.deserialize(dict["cell"]) else { return nil }
+        guard let positionStrings = dict["relativePositions"] as? [[Int]] else { return nil }
+        
+        var block = Block(shape: shape, orientation: orientation)
+        block.anchor = anchor
+        block.cell = cell
+        
+        var positions: [Position] = []
+        for s in positionStrings {
+            guard let position = Position.deserialize(s) else { return nil }
+            positions.append(position)
+        }
+        block.relativePositions = positions
+        
+        return block
+    }
+    
 }
 
 
 extension Block {
-    enum Shape {
+    enum Shape: String, Serializable {
         case O
         case I
         case S
@@ -183,16 +218,26 @@ extension Block {
         case T
         
         static let all: [Shape] = [.O, .I, .S, .Z, .L, .J, .T]
+        
+        
+        typealias Representation = String
+        
+        func serialize() -> String {
+            return rawValue
+        }
+        static func deserialize(_ string: String) -> Shape? {
+            return Shape(rawValue: string.uppercased())
+        }
     }
 }
 
 
 extension Block {
-    enum Orientation {
-        case north
-        case east
-        case west
-        case south
+    enum Orientation: String, Serializable {
+        case north = "N"
+        case east = "E"
+        case west = "W"
+        case south = "S"
         
         static let all: [Orientation] = [.north, .east, .west, .south]
         
@@ -212,6 +257,16 @@ extension Block {
             case .south: return .east
             case .east:  return .north
             }
+        }
+        
+        
+        typealias Representation = String
+        
+        func serialize() -> String {
+            return rawValue
+        }
+        static func deserialize(_ string: String) -> Orientation? {
+            return Orientation(rawValue: string.uppercased())
         }
     }
 }
