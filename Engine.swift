@@ -121,7 +121,7 @@ final class Engine: Serializable {
                 callback?(.completed(lines: completed))
             }
             
-            if board.isFrozen(above: height) {
+            if isGameOver {
                 callback?(.gameOver)
                 stop()
             }
@@ -210,6 +210,10 @@ final class Engine: Serializable {
     var board: Board
     func cellAt(x: Int, y: Int) -> Cell {
         return board.cell(at: Position(x: x, y: y))
+    }
+    
+    var isGameOver: Bool {
+        return board.isFrozen(above: height)
     }
     
     enum Event {
