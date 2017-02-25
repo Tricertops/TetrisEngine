@@ -181,6 +181,8 @@ final class Engine: Serializable {
     }
     
     func moveLeft() {
+        if state != .running { return }
+        
         if currentBlock.canMoveLeft(in: board) {
             currentBlock.moveLeft()
             callback?(.moveLeft)
@@ -188,6 +190,8 @@ final class Engine: Serializable {
     }
     
     func moveRight() {
+        if state != .running { return }
+        
         if currentBlock.canMoveRight(in: board) {
             currentBlock.moveRight()
             callback?(.moveRight)
@@ -195,6 +199,8 @@ final class Engine: Serializable {
     }
     
     func drop(in time: TimeInterval = 0) {
+        if state != .running { return }
+        
         cancelTick()
         
         var distance = 0
@@ -207,6 +213,8 @@ final class Engine: Serializable {
     }
     
     func rotate() {
+        if state != .running { return }
+        
         if currentBlock.rotate(in: board) {
             callback?(.rotate(by: 90))
         }
