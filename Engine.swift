@@ -72,12 +72,16 @@ final class Engine: Serializable {
         timer = nil
     }
     
+    var dateStarted: Date = .distantFuture
+    
     func start() {
         score = 0
+        blockCount = 0
         board.clear()
         recentShapes = []
         currentBlock = generateNextBlock().placed(above: height, in: board)
         nextBlock = generateNextBlock()
+        dateStarted = Date()
         
         callback?(.startGame)
         callback?(.newBlock)
@@ -112,6 +116,7 @@ final class Engine: Serializable {
         }
         else if case .falling = currentBlock.cell {
             currentBlock.makeFrozen()
+            blockCount += 1
             callback?(.freeze)
             
             let completed = board.findCompletedLines()
@@ -216,6 +221,12 @@ final class Engine: Serializable {
         return board.isFrozen(above: height)
     }
     
+    var blockCount: Int = 0
+    
+    var shouldContinueAfterRestoration: Bool {
+        return isGameOver.not && blockCount > 0
+    }
+    
     enum Event {
         typealias Degrees = Int
         case startGame
@@ -242,11 +253,15 @@ final class Engine: Serializable {
         dict["height"] = height
         dict["initialInterval"] = initialInterval
         dict["score"] = score
+        dict["blocks"] = blockCount
         
         dict["currentBlock"] = currentBlock.serialize()
         dict["nextBlock"] = nextBlock.serialize()
         dict["recentShapes"] = recentShapes.map { $0.serialize() }
         dict["board"] = board.serialize()
+        
+        dict["started"] = dateStarted
+        dict["serialized"] = Date()
         
         return dict
     }
@@ -260,6 +275,9 @@ final class Engine: Serializable {
         
         guard let score = dict["score"] as? Int else { return nil }
         engine.score = score
+        
+        guard let blocks = dict["blocks"] as? Int else { return nil }
+        engine.blockCount = blocks
         
         guard let currentBlock = Block.deserialize(dict["currentBlock"]) else { return nil }
         engine.currentBlock = currentBlock
@@ -277,6 +295,9 @@ final class Engine: Serializable {
         
         guard let board = Board.deserialize(dict["board"]) else { return nil }
         engine.board = board
+        
+        guard let dateStarted = dict["started"] as? Date else { return nil }
+        engine.dateStarted = dateStarted
         
         return engine
     }
