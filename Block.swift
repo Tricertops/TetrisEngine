@@ -12,19 +12,56 @@
 import Foundation
 
 
-public struct Block: Serializable {
+public struct Block {
+    
+    public enum Shape: String {
+        case O
+        case I
+        case S
+        case Z
+        case L
+        case J
+        case T
+    }
     public let shape: Shape
+    
+    public enum Orientation: String {
+        case north = "N"
+        case east = "E"
+        case west = "W"
+        case south = "S"
+    }
     public internal(set) var orientation: Orientation = .north
     
     public internal(set) var anchor: Position = Position(x: 0, y: 0)
     public internal(set) var relativePositions: [Position] = []
-    var absolutePositions: [Position] {
+    
+    public var absolutePositions: [Position] {
         return relativePositions.map {
             return Position(x: $0.x + anchor.x,
                             y: $0.y + anchor.y)
         }
     }
+    
     public var rectangle: (x: Int, y: Int, width: Int, height: Int) {
+        return calculateRectangle()
+    }
+    
+    public init (shape: Shape = .T, orientation: Orientation = .north) {
+        self.shape = shape
+        self.orientation = orientation
+        
+        let indices = Block.matrixIndices(shape: shape, orientation: orientation)
+        relativePositions = indices.map(Position.init(matrixIndex:))
+    }
+    
+    var cell: Cell = .empty
+}
+
+
+extension Block {
+    
+    func calculateRectangle() -> (x: Int, y: Int, width: Int, height: Int) {
         var top = 0
         var left = 0
         var right = 0
@@ -39,16 +76,6 @@ public struct Block: Serializable {
                 y: bottom,
                 width: right - left + 1,
                 height: top - bottom + 1)
-    }
-    
-    var cell: Cell = .empty
-    
-    public init (shape: Shape = .T, orientation: Orientation = .north) {
-        self.shape = shape
-        self.orientation = orientation
-        
-        let indices = Block.matrixIndices(shape: shape, orientation: orientation)
-        relativePositions = indices.map(Position.init(matrixIndex:))
     }
     
     mutating func rotate(clockwise: Bool) {
@@ -171,8 +198,10 @@ public struct Block: Serializable {
         }
         return no
     }
-    
-    
+}
+
+extension Block: Serializable {
+
     typealias Representation = [String: Any]
     
     func serialize() -> Representation {
@@ -210,67 +239,52 @@ public struct Block: Serializable {
 }
 
 
-extension Block {
-    public enum Shape: String, Serializable {
-        case O
-        case I
-        case S
-        case Z
-        case L
-        case J
-        case T
-        
-        public static let all: [Shape] = [.O, .I, .S, .Z, .L, .J, .T]
-        
-        
-        typealias Representation = String
-        
-        func serialize() -> String {
-            return rawValue
-        }
-        static func deserialize(_ string: String) -> Shape? {
-            return Shape(rawValue: string.uppercased())
-        }
+extension Block.Shape: Serializable {
+    
+    public static let all: [Block.Shape] = [.O, .I, .S, .Z, .L, .J, .T]
+    
+    typealias Representation = String
+    
+    func serialize() -> String {
+        return rawValue
+    }
+    
+    static func deserialize(_ string: String) -> Block.Shape? {
+        return Block.Shape(rawValue: string.uppercased())
     }
 }
 
 
-extension Block {
-    public enum Orientation: String, Serializable {
-        case north = "N"
-        case east = "E"
-        case west = "W"
-        case south = "S"
-        
-        public static let all: [Orientation] = [.north, .east, .west, .south]
-        
-        public var clockwise: Orientation {
-            switch self {
-            case .north: return .east
-            case .east:  return .south
-            case .south: return .west
-            case .west:  return .north
-            }
+extension Block.Orientation: Serializable {
+    
+    public static let all: [Block.Orientation] = [.north, .east, .west, .south]
+    
+    public var clockwise: Block.Orientation {
+        switch self {
+        case .north: return .east
+        case .east:  return .south
+        case .south: return .west
+        case .west:  return .north
         }
-        
-        public var counterClockwise: Orientation {
-            switch self {
-            case .north: return .west
-            case .west:  return .south
-            case .south: return .east
-            case .east:  return .north
-            }
+    }
+    
+    public var counterClockwise: Block.Orientation {
+        switch self {
+        case .north: return .west
+        case .west:  return .south
+        case .south: return .east
+        case .east:  return .north
         }
-        
-        
-        typealias Representation = String
-        
-        func serialize() -> String {
-            return rawValue
-        }
-        static func deserialize(_ string: String) -> Orientation? {
-            return Orientation(rawValue: string.uppercased())
-        }
+    }
+    
+    
+    typealias Representation = String
+    
+    func serialize() -> String {
+        return rawValue
+    }
+    static func deserialize(_ string: String) -> Block.Orientation? {
+        return Block.Orientation(rawValue: string.uppercased())
     }
 }
 
