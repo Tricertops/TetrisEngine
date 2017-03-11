@@ -1,27 +1,30 @@
 //
 //  Block.swift
-//  Tetris
+//  Tetris Engine
 //
 //  Created by Martin Kiss on 17 Jan 2017.
-//  Copyright © 2017 Tricertops. All rights reserved.
+//  https://github.com/Tricertops/TetrisEngine
+//
+//  The MIT License (MIT)
+//  Copyright © 2017 Martin Kiss
 //
 
 import Foundation
 
 
-struct Block: Serializable {
-    let shape: Shape
-    var orientation: Orientation = .north
+public struct Block: Serializable {
+    public let shape: Shape
+    public internal(set) var orientation: Orientation = .north
     
-    var anchor: Position = Position(x: 0, y: 0)
-    var relativePositions: [Position] = []
+    public internal(set) var anchor: Position = Position(x: 0, y: 0)
+    public internal(set) var relativePositions: [Position] = []
     var absolutePositions: [Position] {
         return relativePositions.map {
             return Position(x: $0.x + anchor.x,
                             y: $0.y + anchor.y)
         }
     }
-    var rectangle: (x: Int, y: Int, width: Int, height: Int) {
+    public var rectangle: (x: Int, y: Int, width: Int, height: Int) {
         var top = 0
         var left = 0
         var right = 0
@@ -40,7 +43,7 @@ struct Block: Serializable {
     
     var cell: Cell = .empty
     
-    init (shape: Shape = .T, orientation: Orientation = .north) {
+    public init (shape: Shape = .T, orientation: Orientation = .north) {
         self.shape = shape
         self.orientation = orientation
         
@@ -208,7 +211,7 @@ struct Block: Serializable {
 
 
 extension Block {
-    enum Shape: String, Serializable {
+    public enum Shape: String, Serializable {
         case O
         case I
         case S
@@ -217,7 +220,7 @@ extension Block {
         case J
         case T
         
-        static let all: [Shape] = [.O, .I, .S, .Z, .L, .J, .T]
+        public static let all: [Shape] = [.O, .I, .S, .Z, .L, .J, .T]
         
         
         typealias Representation = String
@@ -233,15 +236,15 @@ extension Block {
 
 
 extension Block {
-    enum Orientation: String, Serializable {
+    public enum Orientation: String, Serializable {
         case north = "N"
         case east = "E"
         case west = "W"
         case south = "S"
         
-        static let all: [Orientation] = [.north, .east, .west, .south]
+        public static let all: [Orientation] = [.north, .east, .west, .south]
         
-        var clockwise: Orientation {
+        public var clockwise: Orientation {
             switch self {
             case .north: return .east
             case .east:  return .south
@@ -250,7 +253,7 @@ extension Block {
             }
         }
         
-        var counterClockwise: Orientation {
+        public var counterClockwise: Orientation {
             switch self {
             case .north: return .west
             case .west:  return .south

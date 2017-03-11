@@ -1,5 +1,5 @@
 //
-//  TetrisEngine.swift
+//  Engine.swift
 //  Tetris Engine
 //
 //  Created by Martin Kiss on 16 Jan 2017.
@@ -12,12 +12,12 @@
 import Foundation
 
 
-final class Engine: Serializable {
+public final class Engine: Serializable {
     
-    let width: Int
-    let height: Int
+    public let width: Int
+    public let height: Int
     
-    init(width: Int, height: Int, interval: TimeInterval) {
+    public init(width: Int, height: Int, interval: TimeInterval) {
         assert(width >= 4)
         assert(height >= 10)
         self.width = width
@@ -33,28 +33,28 @@ final class Engine: Serializable {
     }
     
     
-    enum State {
+    public enum State {
         case initialized
         case running
         case paused
         case stopped
     }
-    var state: State
+    public internal(set) var state: State
     
-    var timer: Timer?
+    private var timer: Timer?
     
-    let initialInterval: TimeInterval
+    public let initialInterval: TimeInterval
     
-    var interval: TimeInterval {
+    public var interval: TimeInterval {
         // Decrease asymptotically to zero.
         // Half of the initial time is around score 70, quarter around 210.
         let exponent = 1 / (Double(score) / 100 + 1)
         return initialInterval * pow(2, exponent) - 1
     }
     
-    var score: Int = 0
+    public internal (set) var score: Int = 0
     
-    func scheduleTick(in time: TimeInterval? = nil) {
+    private func scheduleTick(in time: TimeInterval? = nil) {
         cancelTick()
         
         let interval = time ?? self.interval
@@ -67,14 +67,14 @@ final class Engine: Serializable {
         RunLoop.main.add(timer!, forMode: .commonModes)
     }
     
-    func cancelTick() {
+    private func cancelTick() {
         timer?.invalidate()
         timer = nil
     }
     
-    var dateStarted: Date = .distantFuture
+    public var dateStarted: Date = .distantFuture
     
-    func start() {
+    public func start() {
         score = 0
         blockCount = 0
         board.clear()
@@ -90,22 +90,22 @@ final class Engine: Serializable {
         state = .running
     }
     
-    func pause() {
+    public func pause() {
         cancelTick()
         state = .paused
     }
     
-    func resume() {
+    public func resume() {
         scheduleTick()
         state = .running
     }
     
-    func stop() {
+    public func stop() {
         cancelTick()
         state = .stopped
     }
     
-    func tick() {
+    private func tick() {
         assert(state == .running)
         cancelTick()
         
@@ -142,7 +142,7 @@ final class Engine: Serializable {
         }
     }
     
-    var currentBlock: Block {
+    public internal(set) var currentBlock: Block {
         willSet {
             let oldBlock = currentBlock
             if oldBlock.isFalling {
@@ -160,11 +160,11 @@ final class Engine: Serializable {
             }
         }
     }
-    var nextBlock: Block
+    public internal(set) var nextBlock: Block
     
-    var recentShapes: [Block.Shape] = []
+    private var recentShapes: [Block.Shape] = []
     
-    func generateNextBlock() -> Block {
+    private func generateNextBlock() -> Block {
         var shapes = Block.Shape.all
         for recent in recentShapes {
             let index = shapes.index(of: recent)!
@@ -180,7 +180,7 @@ final class Engine: Serializable {
         return Block(shape: shape, orientation: Block.Orientation.all.random())
     }
     
-    func moveLeft() {
+    public func moveLeft() {
         if state != .running { return }
         
         if currentBlock.canMoveLeft(in: board) {
@@ -189,7 +189,7 @@ final class Engine: Serializable {
         }
     }
     
-    func moveRight() {
+    public func moveRight() {
         if state != .running { return }
         
         if currentBlock.canMoveRight(in: board) {
@@ -198,7 +198,7 @@ final class Engine: Serializable {
         }
     }
     
-    func drop(in time: TimeInterval = 0) {
+    public func drop(in time: TimeInterval = 0) {
         if state != .running { return }
         
         cancelTick()
@@ -212,49 +212,48 @@ final class Engine: Serializable {
         scheduleTick(in: time)
     }
     
-    func rotate() {
+    public func rotate() {
         if state != .running { return }
         
         if currentBlock.rotate(in: board) {
-            callback?(.rotate(by: 90))
+            callback?(.rotate)
         }
     }
     
-    var board: Board
-    func cellAt(x: Int, y: Int) -> Cell {
+    private var board: Board
+    public func cellAt(x: Int, y: Int) -> Cell {
         return board.cell(at: Position(x: x, y: y))
     }
     
-    var isGameOver: Bool {
+    public var isGameOver: Bool {
         return board.isFrozen(above: height)
     }
     
-    var blockCount: Int = 0
+    private var blockCount: Int = 0
     
-    var shouldContinueAfterRestoration: Bool {
+    public var shouldContinueAfterRestoration: Bool {
         return isGameOver.not && blockCount > 0
     }
     
-    enum Event {
-        typealias Degrees = Int
+    public enum Event {
         case startGame
         case newBlock
         case fall
         case drop(by: Int)
         case moveLeft
         case moveRight
-        case rotate(by: Degrees)
+        case rotate
         case freeze
         case completed(lines: IndexSet)
         case gameOver
     }
-    typealias Callback = (Event) -> Void
-    var callback: Callback?
+    public typealias Callback = (Event) -> Void
+    public var callback: Callback?
     
     
-    typealias Representation = [String: Any]
+    public typealias Representation = [String: Any]
     
-    func serialize() -> Representation {
+    public func serialize() -> Representation {
         var dict: Representation = [:]
         
         dict["width"] = width
@@ -274,7 +273,7 @@ final class Engine: Serializable {
         return dict
     }
     
-    static func deserialize(_ dict: Representation) -> Engine? {
+    public static func deserialize(_ dict: Representation) -> Engine? {
         guard let width = dict["width"] as? Int else { return nil }
         guard let height = dict["height"] as? Int else { return nil }
         guard let interval = dict["initialInterval"] as? TimeInterval else { return nil }

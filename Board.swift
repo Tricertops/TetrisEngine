@@ -1,28 +1,36 @@
 //
 //  Board.swift
-//  Tetris
+//  Tetris Engine
 //
 //  Created by Martin Kiss on 17 Jan 2017.
-//  Copyright © 2017 Tricertops. All rights reserved.
+//  https://github.com/Tricertops/TetrisEngine
+//
+//  The MIT License (MIT)
+//  Copyright © 2017 Martin Kiss
 //
 
 import Foundation
 
 
-struct Position: Serializable {
-    var x: Int
-    var y: Int
+public struct Position: Serializable {
+    public var x: Int
+    public var y: Int
     
-    var above: Position {
+    public init(x: Int, y: Int) {
+        self.x = x
+        self.y = y
+    }
+    
+    public var above: Position {
         return Position(x: x, y: y + 1)
     }
-    var below: Position {
+    public var below: Position {
         return Position(x: x, y: y - 1)
     }
-    var left: Position {
+    public var left: Position {
         return Position(x: x - 1, y: y)
     }
-    var right: Position {
+    public var right: Position {
         return Position(x: x + 1, y: y)
     }
     
@@ -163,13 +171,13 @@ final class Board: Serializable {
 }
 
 
-enum Cell: Serializable {
+public enum Cell: Serializable {
     case empty
     case frozen(shape: Block.Shape)
     case falling(shape: Block.Shape)
     case outer
     
-    var isEmpty: Bool {
+    public var isEmpty: Bool {
         switch self {
         case .empty: return yes
         default: return no

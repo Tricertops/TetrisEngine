@@ -1,9 +1,12 @@
 //
 //  Serialization.swift
-//  Tetris
+//  Tetris Engine
 //
 //  Created by Martin Kiss on 17 Feb 2017.
-//  Copyright © 2017 Tricertops. All rights reserved.
+//  https://github.com/Tricertops/TetrisEngine
+//
+//  The MIT License (MIT)
+//  Copyright © 2017 Martin Kiss
 //
 
 import Foundation
@@ -18,7 +21,7 @@ protocol Serializable {
 
 
 extension Serializable {
-    static func deserialize(_ representation: Any?) -> Self? {
+    public static func deserialize(_ representation: Any?) -> Self? {
         guard let representation = representation as? Self.Representation
             else { return nil }
         return Self.deserialize(representation)
