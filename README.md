@@ -20,7 +20,11 @@ This framework contains logic for a simple Tetris game. Feel free to use it, bui
 - Listen to **callback** from the engine and update your UI.
 - Show next block and **score** on screen.
 
+---
+
+This engine was used to build [this Tetris game](https://itunes.apple.com/app/tetra-tennis-black/id1212012447?mt=8) on App Store.
 
 ---
+
 The MIT License (MIT)  
 Copyright © 2017 Martin Kiss
