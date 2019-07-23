@@ -197,7 +197,7 @@ extension Engine {
             self.tick()
         }
         
-        RunLoop.main.add(timer!, forMode: .commonModes)
+        RunLoop.main.add(timer!, forMode: .common)
     }
     
     func cancelTick() {
@@ -245,7 +245,7 @@ extension Engine {
     func generateNextBlock() -> Block {
         var shapes = Block.Shape.all
         for recent in recentShapes {
-            let index = shapes.index(of: recent)!
+            let index = shapes.firstIndex(of: recent)!
             shapes.remove(at: index)
         }
         let shape = shapes.random()
