@@ -112,8 +112,10 @@ public final class Engine {
     public func rotate() {
         if state != .running { return }
         
-        if currentBlock.rotate(in: board) {
-            callback?(.rotate)
+        if currentBlock.isFalling {
+            if currentBlock.rotate(in: board) {
+                callback?(.rotate)
+            }
         }
     }
     
